@@ -6,14 +6,69 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="style.css" />
     <title>Простой сайт</title>
+    <script>
+      const generateDemo = () => {
+        const tipsContainer = document.querySelector("#tips");
+
+        // выгружаем демо
+        fetch("https://jsonplaceholder.typicode.com/users")
+          .then((response) => response.json())
+          .then((json) => {
+            // вписываем в подсказки внизу
+            tipsContainer.innerHTML =
+              "Варианты поиска: " +
+              json.map(({ username }) => username).join(", ");
+          });
+      };
+      const startSearch = (value) => {
+        // находим блок, куда будем вписывать резальтат поиска
+        const resultContainer = document.querySelector("#result");
+
+        // из демо сервера достем данные по полю username
+        fetch("https://jsonplaceholder.typicode.com/users?username=" + value)
+          .then((response) => response.json())
+          .then((json) => {
+            // вписываем результат или заглушка, что ничего не нашли
+            resultContainer.innerHTML =
+              json.length > 0 ? json[0].email : "Не найдено";
+          });
+      };
+
+      // это часть кода запускается сразу по загрузки страницы
+      window.onload = function () {
+        // Генерируем демо для поиска
+        generateDemo();
+
+        // находим поле поиска и кнопку
+        const input = document.querySelector("#input");
+        const btn = document.querySelector("#btn");
+
+        // на кнопку вешаем слушатель клика
+        btn.addEventListener("click", () => {
+          // при клике начинаем искать
+          startSearch(input.value);
+        });
+
+        // достсем параметры из адресной строки
+        const urlParams = new URLSearchParams(window.location.search);
+        const username = urlParams.get("username"); // достаем username
+        input.value = username; // вписываем его в поле поиска
+
+        // если в параметре что-то есть, то сразу начинаем поиск
+        if (username) {
+          startSearch(username);
+        }
+      };
+    </script>
   </head>
   <body>
     <div class="container">
       <div class="search-bar">
         <input id="input" />
-        <button>Поиск</button>
+        <button id="btn">Поиск</button>
       </div>
-      <div class="result"></div>
+      <div id="result"></div>
+      <div id="tips"></div>
     </div>
   </body>
 </html>
